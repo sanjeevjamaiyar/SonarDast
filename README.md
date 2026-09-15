@@ -240,6 +240,22 @@ python app.py
 
 Application runs at http://localhost:5000
 
+## GitHub Actions CI/CD
+
+The workflow at `.github/workflows/ci-cd.yml` runs on pushes to `main`, pull requests, and manual dispatches. It performs:
+
+- Application smoke tests
+- Dependency scanning with `pip-audit`
+- Optional SonarQube analysis
+- OWASP ZAP baseline scanning
+
+To enable the SonarQube job, add these repository secrets in **Settings > Secrets and variables > Actions**:
+
+- `SONAR_HOST_URL`: your SonarQube server URL
+- `SONAR_TOKEN`: a SonarQube analysis token
+
+The dependency and DAST jobs are currently non-blocking so this intentionally vulnerable training project can demonstrate findings without preventing the workflow from completing. The final deploy job is a placeholder for the hosting provider's deployment command.
+
 ---
 
 ## 🕷️ Step 6: DAST with OWASP ZAP
