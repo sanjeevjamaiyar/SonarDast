@@ -89,6 +89,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify SonarQube server is reachable
+        if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
+        env:
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        run: |
+          sonar_url="${SONAR_HOST_URL%/}"
+          case "$sonar_url" in
+            http://localhost*|https://localhost*|http://127.0.0.1*|https://127.0.0.1*)
+              echo "SONAR_HOST_URL points to localhost. GitHub-hosted runners cannot access SonarQube running on your local machine."
+              echo "Use a public SonarQube URL, SonarCloud, or a self-hosted GitHub runner."
+              exit 1
+              ;;
+          esac
+          curl --fail --silent --show-error --connect-timeout 10 "$sonar_url/api/system/status" > /dev/null
+
       - name: SonarQube scan
         if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
         uses: SonarSource/sonarqube-scan-action@v6

@@ -251,8 +251,10 @@ The workflow at `.github/workflows/ci-cd.yml` runs on pushes to `main`, pull req
 
 To enable the SonarQube job, add these repository secrets in **Settings > Secrets and variables > Actions**:
 
-- `SONAR_HOST_URL`: your SonarQube server URL
+- `SONAR_HOST_URL`: a SonarQube server URL reachable from GitHub Actions, such as `https://sonarcloud.io`
 - `SONAR_TOKEN`: a SonarQube analysis token
+
+Do not use `http://localhost:9000` for `SONAR_HOST_URL` on a GitHub-hosted runner. That address points to the temporary GitHub runner, not a SonarQube server on your computer. Use SonarCloud, a publicly reachable SonarQube server, or a self-hosted GitHub runner that can access your local SonarQube instance.
 
 The dependency and DAST jobs are currently non-blocking so this intentionally vulnerable training project can demonstrate findings without preventing the workflow from completing. The final deploy job is a placeholder for the hosting provider's deployment command.
 
