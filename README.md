@@ -258,6 +258,18 @@ Do not use `http://localhost:9000` for `SONAR_HOST_URL` on a GitHub-hosted runne
 
 The dependency and DAST jobs are currently non-blocking so this intentionally vulnerable training project can demonstrate findings without preventing the workflow from completing. The final deploy job is a placeholder for the hosting provider's deployment command.
 
+### Store ZAP reports in JFrog Artifactory
+
+The workflow can publish ZAP reports to a JFrog Artifactory generic repository. The free JFrog Cloud plan can be used for this small learning project, subject to its current storage, transfer, and usage limits.
+
+Add these repository secrets in **Settings > Secrets and variables > Actions**:
+
+- `JFROG_URL`: your Artifactory URL, such as `https://your-company.jfrog.io`
+- `JFROG_ACCESS_TOKEN`: an Artifactory access token with deploy permission to the repository
+- `JFROG_REPOSITORY`: the generic/local repository key, such as `security-reports-local`
+
+Reports are uploaded under `zap/<repository>/<commit>/`. If these secrets are absent, the workflow skips JFrog and still uploads the reports to GitHub Actions artifacts.
+
 ---
 
 ## 🕷️ Step 6: DAST with OWASP ZAP

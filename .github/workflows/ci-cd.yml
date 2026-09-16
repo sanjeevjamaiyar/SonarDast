@@ -116,6 +116,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     continue-on-error: true
+    env:
+      JFROG_URL: ${{ secrets.JFROG_URL }}
+      JFROG_ACCESS_TOKEN: ${{ secrets.JFROG_ACCESS_TOKEN }}
+      JFROG_REPOSITORY: ${{ secrets.JFROG_REPOSITORY }}
 
     steps:
       - name: Check out repository
@@ -156,6 +160,22 @@ jobs:
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: http://127.0.0.1:5000
+
+      - name: Set up JFrog CLI
+        if: ${{ always() && env.JFROG_URL != '' && env.JFROG_ACCESS_TOKEN != '' && env.JFROG_REPOSITORY != '' }}
+        uses: jfrog/setup-jfrog-cli@v4
+
+      - name: Publish reports to JFrog
+        if: ${{ always() && env.JFROG_URL != '' && env.JFROG_ACCESS_TOKEN != '' && env.JFROG_REPOSITORY != '' }}
+        run: |
+          jf config add artifact-repository \
+            --url="${JFROG_URL%/}" \
+            --access-token="${JFROG_ACCESS_TOKEN}" \
+            --interactive=false
+          jf rt upload "report_*.*" \
+            "${JFROG_REPOSITORY}/zap/${GITHUB_REPOSITORY}/${GITHUB_SHA}/" \
+            --server-id=artifact-repository \
+            --flat=true
 
       - name: Upload ZAP report
         if: always()
