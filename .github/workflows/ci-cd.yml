@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
+      - name: Install Playwright test dependencies
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m playwright install --with-deps chromium
+
       - name: Initialize test database
         run: |
           python - <<'PY'
@@ -53,6 +58,25 @@ jobs:
           assert client.get('/token').status_code == 200
           print('Smoke tests passed')
           PY
+
+      - name: Run Playwright tests
+        run: |
+          python -m pytest tests \
+            --output=test-results \
+            --tracing=retain-on-failure \
+            --video=retain-on-failure \
+            --screenshot=only-on-failure \
+            --junitxml=playwright-results.xml
+
+      - name: Publish Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          if-no-files-found: ignore
+          path: |
+            playwright-results.xml
+            test-results/
 
   dependency-scan:
     name: Dependency scan
